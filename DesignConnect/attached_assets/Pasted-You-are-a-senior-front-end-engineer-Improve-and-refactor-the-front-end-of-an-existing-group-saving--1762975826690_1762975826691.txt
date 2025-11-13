@@ -1,0 +1,260 @@
+You are a senior front-end engineer. Improve and refactor the front end of an existing group-saving web app while preserving every current feature and data flow. Produce clean, accessible, responsive, and maintainable HTML/CSS/vanilla JavaScript (no frameworks) by default. If the repo already uses a framework, give a separate branch suggestion implementing the same UI/UX in React (functional components + hooks) and provide migration notes. Deliver modular, well-documented code, with comments, clear file structure, and small reusable components.
+
+Goals
+
+Keep every existing feature and data intact.
+
+Improve visual hierarchy, spacing, typography, colors, and UX.
+
+Make the UI responsive (mobile-first).
+
+Ensure accessibility (semantic HTML, aria attributes, keyboard navigation, color contrast).
+
+Keep global state predictable and easily testable.
+
+Provide simple mock API contracts so back-end integration is straightforward.
+
+Pages & UI behaviour (must be implemented exactly as described)
+
+Dashboard (home)
+
+Top right: Login/Logout button (changes label and behavior based on auth state).
+
+Key metrics row: Number of active members, Total savings, Pending total, Target and target progress %.
+
+Pending section: a table that lists members who missed the daily deposit with columns: Member name, Missed date(s), Amount missed (sum). Include quick action to send reminder (UI only).
+
+Charts:
+
+Pie chart that shows percentage contribution per member (click slices to highlight member).
+
+Week graph (line or bar) showing total contributions per day for the last 7 days with hover tooltips and Y-axis labels.
+
+Top contributor card: show member name, avatar, total contributed this week, and rank badge.
+
+All dashboard changes must reflect immediately when member/fund actions occur (no page refresh).
+
+Provide a small “activity feed” showing last 10 actions (deposit, withdraw, loan approved, member added).
+
+Members page
+
+Add Member form (inline or modal) with fields: Full name, phone, email, profile image (optional), join date, reason for saving (text/short list), initial contribution.
+
+Member list (searchable + paginated): shows avatar, name, phone, total saved, outstanding (if any), quick actions: Edit, Delete, View Details.
+
+Edit opens a form prefilled; Delete prompts confirm.
+
+Beside the Add Member form, have a compact “Reason of saving” list per member that’s editable (tags or short text).
+
+Provide client-side validation with helpful inline messages.
+
+Funds page
+
+Select a member (dropdown or searchable typeahead) then show deposit/withdraw controls.
+
+Actions:
+
+Deposit: open prompt/modal with fields: amount, note, date (auto today), confirm/cancel buttons.
+
+Withdraw: same pattern with reason.
+
+After confirm, show success toast and update member’s contribution list and dashboard metrics immediately.
+
+Under the deposit/withdraw form, list that member’s contribution history (date, amount, type, note).
+
+All actions are optimistic UI updates with ability to rollback if API returns error (mock behavior in this front-end only task).
+
+Personal Plan page
+
+Section A: Income per week (numeric input).
+
+Section B: Spending categories (editable list): food, transport, internet, electricity, others. Each category: planned weekly amount and actual spent (editable).
+
+Visual indicators: categories with actual > planned show red, near target show orange, below planned show green. Provide simple rules: >120% red, 100–120% orange, <100% green.
+
+Section C: Personal saving submodule (same deposit/withdraw UI and history as Funds but scoped to personal plan).
+
+Bottom: Compact summary card: top 3 categories consuming most of the money (sorted by absolute amount) and a one-sentence insight (e.g., “Food consumes 34% of your weekly spend”).
+
+All values update the dashboard’s personal summary widget.
+
+Loan page
+
+Select member, enter loan amount, click Approve → show confirm/cancel modal → on confirm show success toast and create loan record.
+
+Loan records: list with outstanding principal, interest rate, created date, status (active/paid/overdue).
+
+Repay flow: choose loan, enter amount, confirm/cancel modal, on confirm reduce outstanding and update dashboard.
+
+Interest: computed based on interest rate set in Settings. Show computed interest and total payable on approval modal.
+
+Reports, Invoices, Notes, FAQs
+
+Reports: exportable transaction summary (UI-only CSV export button) and a printable monthly report preview.
+
+Invoices: list and ability to generate a simple invoice template from a transaction (UI-only).
+
+Notes: free-text area with autosave (localStorage) per admin.
+
+FAQs: editable list for admin to modify from Settings.
+
+Settings (admin)
+
+Admin management: create/edit/delete admin (name, email, phone, profile pic, password). Protect password fields; allow password reset UI only (no backend).
+
+Financial rules:
+
+Set target amount and period (e.g., KES 50,000 in 6 months).
+
+Set daily minimum saving amount.
+
+Set global interest rate for loans (percentage).
+
+Security: allow toggling password requirement for sensitive actions (approve loan, delete member).
+
+Provide import/export of configuration JSON and a “Reset to defaults” option (with confirm).
+
+Data model & sample JSON (front-end mock schemas)
+
+Member
+
+{
+  "id": "m_01",
+  "name": "Jane Doe",
+  "phone": "+2547xxxxxxx",
+  "email": "jane@example.com",
+  "avatarUrl": null,
+  "joinedAt": "2025-11-01",
+  "reason": "School fees",
+  "totalSaved": 12300,
+  "outstanding": 500
+}
+
+
+Transaction
+
+{
+  "id": "t_01",
+  "memberId": "m_01",
+  "type": "deposit", // deposit | withdraw | loan_disbursement | loan_repayment
+  "amount": 2000,
+  "date": "2025-11-10",
+  "note": "daily save",
+  "createdBy": "admin_01"
+}
+
+
+Loan
+
+{
+  "id": "L_01",
+  "memberId": "m_01",
+  "principal": 10000,
+  "interestRate": 5, // percent
+  "outstanding": 10500, // principal + interest - repayments
+  "status": "active"
+}
+
+
+Settings
+
+{
+  "targetAmount": 50000,
+  "targetPeriodMonths": 6,
+  "dailyMinimum": 50,
+  "globalInterestRate": 5,
+  "admins": [{ "id":"admin_01", "name":"Admin Name", "email":"a@e.com" }]
+}
+
+
+State management & architecture
+
+Provide a small state layer: single AppState object and helper functions for updates. For vanilla JS use a simple Pub/Sub or EventTarget to broadcast changes. For React provide a context + reducer example.
+
+Keep UI components small and pure. Each modal and chart is its own module/file.
+
+Charts: use Chart.js or lightweight library; provide an interface adapter so the library can be swapped.
+
+UX details & micro-interactions
+
+Use modals for confirm/cancel flows with clear primary and secondary actions.
+
+Provide inline validation and accessible error messages.
+
+Use toasts for success/error confirmations.
+
+Keyboard shortcuts: Esc closes modal; Enter confirms a focused confirm button.
+
+Loading skeletons for sections that fetch data.
+
+Design system (tokens)
+
+Typography: Primary: Inter or system-ui; sizes: 20px (h1), 16px (body).
+
+Spacing: 4px base, use multiples for padding/margins.
+
+Color tokens (example palette):
+
+Primary: #0b5fff
+
+Success: #1f8a3d
+
+Warning: #ff9a00
+
+Danger: #ef3b2d
+
+Neutral: #f7f8fa, #e6e9ee
+
+Provide light and dark friendly contrasts and ensure AA color contrast.
+
+Accessibility checklist
+
+Semantic HTML (buttons, forms, labels).
+
+aria-live for toasts.
+
+Skip-to-content link.
+
+All interactive controls reachable by keyboard.
+
+Images have alt text; avatars fall back to initials.
+
+Testing & QA (front-end)
+
+Unit tests: UI helpers and reducers (explain jest-like tests).
+
+Manual tests: add/edit/delete member, deposit/withdraw flows, loan approve/repay, personal plan stress cases, responsive breakpoints.
+
+Edge cases: negative amounts denied, large numbers handled, duplicate member emails validated.
+
+Acceptance criteria (must pass)
+
+All listed pages implemented and visually consistent.
+
+Dashboard updates immediately after any fund/member/loan action.
+
+Confirm/cancel modals for destructive actions.
+
+Chart visualizations show correct aggregated values for last 7 days and per-member contributions.
+
+Export CSV from reports works for current filtered view.
+
+Settings persist (localStorage) and can be exported/imported as JSON.
+
+All forms validate and show friendly messages.
+
+Deliverables
+
+Clean file structure and README with Quick Start (local static server).
+
+Vanilla JS implementation (primary).
+
+Optional branch notes + snippets for React migration (secondary).
+
+Demo dataset and scripts to seed localStorage for testing.
+
+CSS variables for colors and spacing.
+
+Minimal chart config and mock API adapter.
+
+Please implement with progressive enhancement in mind. If anything in the repo suggests an alternate approach (existing React code, CSS framework), place the new implementation in a separate folder frontend-refactor and include migration notes.
